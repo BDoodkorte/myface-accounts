@@ -2,8 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using MyFace.Models.Database;
 using MyFace.Models.Request;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Text;
+
+
+
+
 
 namespace MyFace.Repositories
 {
@@ -17,8 +25,9 @@ namespace MyFace.Repositories
         Post Create(CreatePostRequest post);
         Post Update(int id, UpdatePostRequest update);
         void Delete(int id);
+        bool Authorize(string username, string password);
     }
-    
+
     public class PostsRepo : IPostsRepo
     {
         private readonly MyFaceDbContext _context;
@@ -27,7 +36,7 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<Post> Search(PostSearchRequest search)
         {
             return _context.Posts
@@ -36,7 +45,7 @@ namespace MyFace.Repositories
                 .Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
         }
-        
+
         public IEnumerable<Post> SearchFeed(FeedSearchRequest search)
         {
             return _context.Posts
@@ -86,6 +95,13 @@ namespace MyFace.Repositories
             return insertResult.Entity;
         }
 
+        public bool Authorize(string username, string password)
+        {
+            var user = _context.Users.Where(u => u.Username == username).FirstOrDefault();
+            var passwordHash = UsersRepo.Hash(password);
+            return user.HashedPassword == passwordHash;
+        }
+
         public Post Update(int id, UpdatePostRequest update)
         {
             var post = GetById(id);
@@ -95,7 +111,7 @@ namespace MyFace.Repositories
 
             _context.Posts.Update(post);
             _context.SaveChanges();
-            
+
             return post;
         }
 

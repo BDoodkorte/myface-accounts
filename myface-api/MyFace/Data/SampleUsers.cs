@@ -127,7 +127,7 @@ namespace MyFace.Data
                 Username = Data[index][2],
                 Email = Data[index][3],
                 HashedPassword = UsersRepo.Hash("password"),
-                Salt = UsersRepo.Salt(),
+                //Salt = UsersRepo.Salt(),
                 ProfileImageUrl = ImageGenerator.GetProfileImage(Data[index][2]),
                 CoverImageUrl = ImageGenerator.GetCoverImage(index),
             };
