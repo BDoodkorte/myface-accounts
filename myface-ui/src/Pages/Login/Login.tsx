@@ -2,6 +2,7 @@
 import {Page} from "../Page/Page";
 import {LoginContext} from "../../Components/LoginManager/LoginManager";
 import "./Login.scss";
+import { fetchLogin } from '../../Api/apiClient';
 
 
 export function Login(): JSX.Element {
@@ -14,6 +15,7 @@ export function Login(): JSX.Element {
     function tryLogin(event: FormEvent) {
         event.preventDefault();
         // add fetch login api call 
+        fetchLogin(username,password)
         loginContext.setUsername(username);
         loginContext.setPassword(password);
         loginContext.logIn();

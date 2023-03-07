@@ -45,19 +45,18 @@ export interface NewPost {
 }
 
 // new api call for the logincontroller that passes the header
-// export async function fetchLogin(un: string, pw: string){
-//     const getAuthHeader = (username: string,password: string) => `Basic ${btoa(`${username}:${password}`)}`;
-//     const response = await fetch(`https://localhost:5001/login`,
-//    {headers:{'Authorization': getAuthHeader(un,pw)}}
-//     );
-//     return await response.json();
-// }
+export async function fetchLogin(un: string, pw: string){
+    const getAuthHeader = (username: string,password: string) => `Basic ${btoa(`${username}:${password}`)}`;
+    const response = await fetch(`https://localhost:5001/login`,
+   {headers:{'Authorization': getAuthHeader(un,pw)}}
+    );
+    return await response.json();
+}
 
 const getAuthHeader = (username: string,password: string) => `Basic ${btoa(`${username}:${password}`)}`;
 
 export async function fetchUsers(searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
-    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`,
-   {headers:{'Authorization': getAuthHeader(username,password)}}
+    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`
     );
     return await response.json();
 }
