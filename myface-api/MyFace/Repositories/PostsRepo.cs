@@ -22,7 +22,6 @@ namespace MyFace.Repositories
         Post Create(CreatePostRequest post);
         Post Update(int id, UpdatePostRequest update);
         void Delete(int id);
-        bool Authorize(string username, string password);
     }
 
     public class PostsRepo : IPostsRepo
@@ -91,19 +90,6 @@ namespace MyFace.Repositories
             _context.SaveChanges();
             return insertResult.Entity;
         }
-
-        public bool Authorize(string username, string pw)
-        {
-            var user = _context.Users.Where(u => u.Username == username).FirstOrDefault();
-            var passwordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: pw,
-                salt: user.Salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000,
-                numBytesRequested: 256 / 8));
-            return user.HashedPassword == passwordHash;
-        }
-
         public Post Update(int id, UpdatePostRequest update)
         {
             var post = GetById(id);

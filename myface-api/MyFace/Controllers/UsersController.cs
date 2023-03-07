@@ -15,7 +15,14 @@ namespace MyFace.Controllers
         {
             _users = users;
         }
-        
+
+        private readonly IAuthRepo _auth;
+
+        public UsersController(IAuthRepo auth)
+        {
+            _auth = auth;
+        }
+
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
@@ -38,7 +45,7 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             var user = _users.Create(newUser);
 
             var url = Url.Action("GetById", new { id = user.Id });
@@ -54,15 +61,37 @@ namespace MyFace.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = _users.Update(id, update);
-            return new UserResponse(user);
+            // Authorization
+            string authHeader = this.HttpContext.Request.Headers["Authorization"];
+            var user = _auth.Authorize(authHeader);
+
+            if (user == true)
+            {
+                var users = _users.Update(id, update);
+                return new UserResponse(users);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
-        
+
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            _users.Delete(id);
-            return Ok();
+            // Authorization
+            string authHeader = this.HttpContext.Request.Headers["Authorization"];
+            var user = _auth.Authorize(authHeader);
+
+            if (user == true)
+            {
+                _users.Delete(id);
+                return Ok();
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
     }
 }

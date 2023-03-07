@@ -22,6 +22,13 @@ namespace MyFace.Controllers
             _posts = posts;
         }
 
+        private readonly IAuthRepo _auth;
+
+        public PostsController(IAuthRepo auth)
+        {
+            _auth = auth;
+        }
+
         [HttpGet("")]
         public ActionResult<PostListResponse> Search([FromQuery] PostSearchRequest searchRequest)
         {
@@ -45,20 +52,10 @@ namespace MyFace.Controllers
                 return BadRequest(ModelState);
             }
 
-            // implement auth method
-            // Get header
+            // Authorization
             string authHeader = this.HttpContext.Request.Headers["Authorization"];
-            // Cutting off Basic from header string
-            string encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
-            // Decode username and password
-            Encoding encoding = Encoding.GetEncoding("iso-8859-1");
-            string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
-            int seperatorIndex = usernamePassword.IndexOf(':');
-            // Separate username and password into usable variables
-            string username = usernamePassword.Substring(0, seperatorIndex);
-            string password = usernamePassword.Substring(seperatorIndex + 1);
+            var user = _auth.Authorize(authHeader);
 
-            var user = _posts.Authorize(username, password);
             if (user == true)
             {
                 var post = _posts.Create(newPost);
@@ -79,16 +76,35 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
+            string authHeader = this.HttpContext.Request.Headers["Authorization"];
+            var user = _auth.Authorize(authHeader);
 
-            var post = _posts.Update(id, update);
-            return new PostResponse(post);
+            if (user == true)
+            {
+                var post = _posts.Update(id, update);
+                return new PostResponse(post);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            _posts.Delete(id);
-            return Ok();
+            // Authorization
+            string authHeader = this.HttpContext.Request.Headers["Authorization"];
+            var user = _auth.Authorize(authHeader);
+            if (user == true)
+            {
+                _posts.Delete(id);
+                return Ok();
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
     }
 }
