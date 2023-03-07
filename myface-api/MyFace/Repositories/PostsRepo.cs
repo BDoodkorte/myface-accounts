@@ -8,10 +8,7 @@ using MyFace.Models.Request;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
-
-
-
-
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace MyFace.Repositories
 {
@@ -95,10 +92,15 @@ namespace MyFace.Repositories
             return insertResult.Entity;
         }
 
-        public bool Authorize(string username, string password)
+        public bool Authorize(string username, string pw)
         {
             var user = _context.Users.Where(u => u.Username == username).FirstOrDefault();
-            var passwordHash = UsersRepo.Hash(password);
+            var passwordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: pw,
+                salt: user.Salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
             return user.HashedPassword == passwordHash;
         }
 

@@ -66,11 +66,11 @@ namespace MyFace.Repositories
             return salt;
         }
 
-        public static string Hash(string pw)
+        public static string Hash(string pw, byte[] slt)
         {
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: pw,
-                salt: Salt(),
+                salt: slt,
                 prf: KeyDerivationPrf.HMACSHA256,
                 iterationCount: 100000,
                 numBytesRequested: 256 / 8));
@@ -81,8 +81,8 @@ namespace MyFace.Repositories
 
         public User Create(CreateUserRequest newUser)
         {
-            Salt();
-            var hashed = Hash(newUser.Password);
+            var randomSalt = Salt();
+            var hashed = Hash(newUser.Password, randomSalt);
 
             var insertResponse = _context.Users.Add(new User
             {

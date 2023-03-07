@@ -58,13 +58,18 @@ namespace MyFace.Controllers
             string username = usernamePassword.Substring(0, seperatorIndex);
             string password = usernamePassword.Substring(seperatorIndex + 1);
 
-            var user = _posts.Authorize(username,password);
-
-            var post = _posts.Create(newPost);
-
-            var url = Url.Action("GetById", new { id = post.Id });
-            var postResponse = new PostResponse(post);
-            return Created(url, postResponse);
+            var user = _posts.Authorize(username, password);
+            if (user == true)
+            {
+                var post = _posts.Create(newPost);
+                var url = Url.Action("GetById", new { id = post.Id });
+                var postResponse = new PostResponse(post);
+                return Created(url, postResponse);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpPatch("{id}/update")]
