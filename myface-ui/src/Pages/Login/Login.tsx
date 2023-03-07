@@ -3,14 +3,19 @@ import {Page} from "../Page/Page";
 import {LoginContext} from "../../Components/LoginManager/LoginManager";
 import "./Login.scss";
 
+
 export function Login(): JSX.Element {
     const loginContext = useContext(LoginContext);
+
     
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
     function tryLogin(event: FormEvent) {
         event.preventDefault();
+        // add fetch login api call 
+        loginContext.setUsername(username);
+        loginContext.setPassword(password);
         loginContext.logIn();
     }
     
